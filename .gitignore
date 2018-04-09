@@ -1,0 +1,8 @@
+
+\.client-uid
+.idea/
+target/
+elwasys.properties
+log/
+
+raspi-client\.iml
