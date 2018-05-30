@@ -41,13 +41,13 @@ public class MaintenanceServerManager extends Thread implements ICloseListener, 
         this.manager.listenToCloseEvent(this);
         while (!Thread.interrupted()) {
             if (this.client == null || !this.client.isAlive()) {
-                this.logger.info("Starting new connection to the maintenance server.");
+                this.logger.debug("Starting new connection to the maintenance server.");
                 try {
                     this.client = new MaintenanceClient(this.manager.getConfigurationManager().getMaintenanceServer(),
                             this.manager.getConfigurationManager().getMaintenancePort(), 50000, 5000,
                             this.manager.getConfigurationManager().getLocationName(), this);
                 } catch (final Exception e) {
-                    this.logger.error("Could connect to the maintenance server.", e);
+                    this.logger.debug("Could connect to the maintenance server.", e);
                 }
             }
 
