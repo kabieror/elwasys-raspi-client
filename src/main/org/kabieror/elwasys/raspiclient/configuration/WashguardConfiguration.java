@@ -26,6 +26,7 @@ public class WashguardConfiguration extends ConfigurationManager {
     private final File uidFile = new File(System.getProperty("user.dir") + DS + ".client-uid");
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private String uid = null;
+    private Integer singleInstancePort;
 
     /**
      * Constructor
@@ -146,11 +147,26 @@ public class WashguardConfiguration extends ConfigurationManager {
         try {
             port = Integer.parseInt(this.props.getProperty("maintenance.port"));
         } catch (final NumberFormatException e) {
-            this.logger.warn("The configuration valid maintenance.port has an invalid format. Using the default 3591 " +
+            this.logger.warn("The configuration valid maintenance.port is not specified or has an invalid format. Using the default 3591 " +
                     "instead.");
             return 3591;
         }
         return port;
+    }
+
+    /**
+     * The port on which the application should listen to prevent multiple instances of itself
+     * @return
+     */
+    public int getSingleInstancePort() {
+        int res;
+        try {
+            res = Integer.parseInt(this.props.getProperty("instance.port"));
+        } catch (final NumberFormatException e) {
+            this.logger.warn("The configuration value instance.port is not specified or has an invalid format. Using the default 8271 instead.");
+            return 8271;
+        }
+        return res;
     }
 
     /**
@@ -197,4 +213,5 @@ public class WashguardConfiguration extends ConfigurationManager {
         }
         return this.uid;
     }
+
 }

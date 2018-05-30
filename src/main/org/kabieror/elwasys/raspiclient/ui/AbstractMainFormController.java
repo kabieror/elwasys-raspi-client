@@ -5,6 +5,7 @@ import javafx.fxml.Initializable;
 import org.kabieror.elwasys.common.LocationOccupiedException;
 import org.kabieror.elwasys.common.NoDataFoundException;
 import org.kabieror.elwasys.raspiclient.application.ActionContainer;
+import org.kabieror.elwasys.raspiclient.application.AlreadyRunningException;
 import org.kabieror.elwasys.raspiclient.application.ElwaManager;
 import org.kabieror.elwasys.raspiclient.application.ICloseListener;
 import org.kabieror.elwasys.raspiclient.executions.FhemException;
@@ -122,6 +123,10 @@ public abstract class AbstractMainFormController implements Initializable, IExec
             this.logger.error("Data has been removed unexpectedly", e);
             Platform.runLater(() -> this.displayError("Start fehlgeschlagen",
                     "Ein Datensatz wurde unerwartet aus der Datenbank entfernt. Bitte erneut versuchen.",
+                    actionContainer, false));
+        } catch (AlreadyRunningException e) {
+            Platform.runLater(() -> this.displayError("Start fehlgeschlagen",
+                    "Die Anwendung wurde mehrfach gestartet.",
                     actionContainer, false));
         }
         return false;

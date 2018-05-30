@@ -33,7 +33,10 @@ public class ElwaManager {
      * Die Utilities-Instanz.
      */
     private final Utilities utilities;
+
     private final MaintenanceServerManager maintenanceServerManager;
+
+    private SingleInstanceManager singleInstanceManager;
 
     /**
      * Listener
@@ -123,8 +126,9 @@ public class ElwaManager {
      */
     public void initiate()
             throws ClassNotFoundException, SQLException, IOException, InterruptedException,
-            LocationOccupiedException, FhemException, NoDataFoundException {
+            LocationOccupiedException, FhemException, NoDataFoundException, AlreadyRunningException {
         this.logger.info("Starting up managers");
+        this.singleInstanceManager = new SingleInstanceManager(this.configurationManager.getSingleInstancePort());
         this.dataManager = new DataManager(this.configurationManager);
         this.locationManager = new LocationManager(this.configurationManager);
 
