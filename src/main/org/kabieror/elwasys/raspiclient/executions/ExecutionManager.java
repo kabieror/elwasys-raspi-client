@@ -394,6 +394,8 @@ public class ExecutionManager implements ICloseListener {
 
         private void executeAction() throws SQLException, IOException, InterruptedException, FhemException {
             this.logger.info("[" + this.e.getDevice().getName() + "] Stopping execution " + this.e.getId());
+            this.logger.info("[" + this.e.getDevice().getName() + "] User: " + this.e.getUser().getName());
+            this.logger.info("[" + this.e.getDevice().getName() + "] Total time: " + this.e.getElapsedTime().toString());
 
             // Breche geplante Ausführung ab, falls nicht von dieser
             // gestartet

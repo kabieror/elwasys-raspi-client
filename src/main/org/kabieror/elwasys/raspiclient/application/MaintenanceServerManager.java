@@ -47,7 +47,7 @@ public class MaintenanceServerManager extends Thread implements ICloseListener, 
                             this.manager.getConfigurationManager().getMaintenancePort(), 50000, 5000,
                             this.manager.getConfigurationManager().getLocationName(), this);
                 } catch (final Exception e) {
-                    this.logger.debug("Could connect to the maintenance server.", e);
+                    this.logger.debug("Could connect to the maintenance server.");
                 }
             }
 
