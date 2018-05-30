@@ -66,15 +66,10 @@ public class ExecutionManager implements ICloseListener {
      */
     private final Map<Execution, ScheduledFuture> plannedStops = new HashMap<>();
 
-    /**
-     * Die aktiven Prüfungen der Zustände der Stromzufuhr der Geräte
-     */
-    private final Map<Device, ScheduledFuture> scheduledPowerChecks = new HashMap<>();
-
      /**
      * Erstellt eine Instanz des Ausführungsmanager
      */
-    public ExecutionManager() throws SQLException, NoDataFoundException {
+    public ExecutionManager() {
         this.startListeners = new Vector<>();
         this.finishListeners = new Vector<>();
         this.errorListeners = new Vector<>();
@@ -82,36 +77,42 @@ public class ExecutionManager implements ICloseListener {
 
         ElwaManager.instance.listenToCloseEvent(this);
 
-        // Plane Sicherung vor externer Aktivierung der Stromzufuhr von Geräten
-        for (Device d : ElwaManager.instance.getManagedDevices()) {
-            this.scheduledPowerChecks.put(d, this.executorService.scheduleAtFixedRate(() -> {
-                this.logger.trace(String.format("[%1s] Checking power state", d.getName()));
-                synchronized (d) {
-                    if (d.getCurrentExecution() == null) {
-                        // Stelle sicher, dass die Stromzufuhr des Geräts aus ist.
-                        DevicePowerManager.DevicePowerState state;
-                        try {
-                            state = ElwaManager.instance.getDevicePowerManager().getState(d);
-                        } catch (InterruptedException | FhemException | IOException e1) {
-                            this.logger.error(String.format("[%1s] Could not check power state.", d.getName()), e1);
-                            return;
-                        }
-                        if (state == DevicePowerManager.DevicePowerState.ON) {
-                            // Schalte Gerät aus.
+        this.executorService.scheduleAtFixedRate(() -> {
+            // Plane Sicherung vor externer Aktivierung der Stromzufuhr von Geräten
+            try {
+                for (Device d : ElwaManager.instance.getManagedDevices()) {
+                    this.logger.trace(String.format("[%1s] Checking power state", d.getName()));
+                    synchronized (d) {
+                        if (d.getCurrentExecution() == null) {
+                            // Stelle sicher, dass die Stromzufuhr des Geräts aus ist.
+                            DevicePowerManager.DevicePowerState state;
                             try {
-                                this.logger.warn(String
-                                        .format("[%1s] Device has been powered on but there is no execution running. " +
-                                                "Switching it" + " off now" + ".", d.getName()));
-                                ElwaManager.instance.getDevicePowerManager()
-                                        .setDevicePowerState(d, DevicePowerManager.DevicePowerState.OFF);
-                            } catch (IOException | InterruptedException | FhemException e1) {
-                                this.logger.error(String.format("[%1s] Could not power off device.", d.getName()), e1);
+                                state = ElwaManager.instance.getDevicePowerManager().getState(d);
+                            } catch (InterruptedException | FhemException | IOException e1) {
+                                this.logger.error(String.format("[%1s] Could not check power state.", d.getName()), e1);
+                                return;
+                            }
+                            if (state == DevicePowerManager.DevicePowerState.ON) {
+                                // Schalte Gerät aus.
+                                try {
+                                    this.logger.warn(String
+                                            .format("[%1s] Device has been powered on but there is no execution running. " +
+                                                    "Switching it" + " off now" + ".", d.getName()));
+                                    ElwaManager.instance.getDevicePowerManager()
+                                            .setDevicePowerState(d, DevicePowerManager.DevicePowerState.OFF);
+                                } catch (IOException | InterruptedException | FhemException e1) {
+                                    this.logger.error(String.format("[%1s] Could not power off device.", d.getName()), e1);
+                                }
                             }
                         }
                     }
                 }
-            }, 20, 20, TimeUnit.SECONDS));
-        }
+            } catch (SQLException e) {
+                this.logger.warn("Could not get managed devices.", e);
+            } catch (NoDataFoundException e) {
+                this.logger.warn("No devices found");
+            }
+        }, 20, 20, TimeUnit.SECONDS);
     }
 
     /**
@@ -395,7 +396,7 @@ public class ExecutionManager implements ICloseListener {
         private void executeAction() throws SQLException, IOException, InterruptedException, FhemException {
             this.logger.info("[" + this.e.getDevice().getName() + "] Stopping execution " + this.e.getId());
             this.logger.info("[" + this.e.getDevice().getName() + "] User: " + this.e.getUser().getName());
-            this.logger.info("[" + this.e.getDevice().getName() + "] Total time: " + this.e.getElapsedTime().toString());
+            this.logger.info("[" + this.e.getDevice().getName() + "] Total time: " + this.e.getElapsedTimeString());
 
             // Breche geplante Ausführung ab, falls nicht von dieser
             // gestartet
