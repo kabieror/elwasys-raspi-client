@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * This manager detects the concurrent execution of another instance of the software
@@ -20,6 +21,7 @@ public class SingleInstanceManager extends Thread implements ICloseListener {
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
     private CountDownLatch startupLatch = new CountDownLatch(1);
 
+    private Future serverFuture;
     private ServerSocket serverSocket;
 
     public SingleInstanceManager(Integer port) throws AlreadyRunningException {
@@ -35,7 +37,7 @@ public class SingleInstanceManager extends Thread implements ICloseListener {
         ElwaManager.instance.listenToCloseEvent(this);
 
         // Start server
-        this.executorService.submit(() -> {
+        this.serverFuture = this.executorService.submit(() -> {
             try {
                 this.serverSocket = new ServerSocket(port, 1);
 
@@ -49,14 +51,18 @@ public class SingleInstanceManager extends Thread implements ICloseListener {
             } catch (IOException e) {
                 this.startupLatch.countDown();
             }
+
+            this.logger.info("Single instance server terminated");
         });
 
         // Wait until server has started
         try {
             this.startupLatch.await();
             if (this.serverSocket == null || !this.serverSocket.isBound()) {
+                this.logger.error("Could not start single instance server");
                 throw new AlreadyRunningException();
             }
+            this.logger.info("Started single instance server on port " + port);
         } catch (InterruptedException e) {
             throw new AlreadyRunningException();
         }
@@ -64,6 +70,11 @@ public class SingleInstanceManager extends Thread implements ICloseListener {
 
     @Override
     public void onClose(boolean restart) {
+        try {
+            this.serverSocket.close();
+        } catch (IOException e) {
+            // OK...
+        }
         this.executorService.shutdownNow();
     }
 }
