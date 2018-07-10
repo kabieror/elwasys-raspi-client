@@ -187,6 +187,18 @@ public class WashguardConfiguration extends ConfigurationManager {
     }
 
     /**
+     * Die URL des Online-Portals
+     */
+    public String getPortalUrl() {
+        final String url = this.props.getProperty("portalUrl");
+        if (url.isEmpty()) {
+            this.logger.warn("The configuration value 'portalUrl' is not defined.");
+            return "";
+        }
+        return url;
+    }
+
+    /**
      * Gibt die eindeutige ID dieses Clients zurück.
      *
      * @return Die eindeutige ID dieses Clients.
@@ -213,5 +225,4 @@ public class WashguardConfiguration extends ConfigurationManager {
         }
         return this.uid;
     }
-
 }

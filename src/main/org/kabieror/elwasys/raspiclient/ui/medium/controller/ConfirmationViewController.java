@@ -66,6 +66,9 @@ public class ConfirmationViewController implements Initializable, IViewControlle
     private StringProperty emailNotificationText = new SimpleStringProperty();
     private StringProperty ionicNotificationText = new SimpleStringProperty();
     private StringProperty registeredUserUserName = new SimpleStringProperty();
+    private StringProperty moreInfoText = new SimpleStringProperty();
+    private StringProperty portalUrl = new SimpleStringProperty();
+
     /**
      * Liste aller Programme zum ausgewählten Gerät
      */
@@ -134,6 +137,9 @@ public class ConfirmationViewController implements Initializable, IViewControlle
 
         this.confirmationPane.setVisible(true);
         this.mfc.registeredUserProperty().addListener(this.registeredUserChangedListener);
+
+        this.setPortalUrl(ElwaManager.instance.getConfigurationManager().getPortalUrl());
+        this.setMoreInfoText("Mehr Informationen in der elwaApp und unter " + this.getPortalUrl());
 
         // Lade Programme
         List<Program> progs = this.mfc.getSelectedDevice().getPrograms(this.mfc.getRegisteredUser());
@@ -452,5 +458,35 @@ public class ConfirmationViewController implements Initializable, IViewControlle
 
     public StringProperty registeredUserUserNameProperty() {
         return registeredUserUserName;
+    }
+
+    /**
+     * Property: portalUrl
+     */
+    public String getPortalUrl() {
+        return portalUrl.get();
+    }
+
+    public StringProperty portalUrlProperty() {
+        return portalUrl;
+    }
+
+    public void setPortalUrl(String portalUrl) {
+        this.portalUrl.set(portalUrl);
+    }
+
+    /**
+     * Property: moreInfoText
+     */
+    public String getMoreInfoText() {
+        return moreInfoText.get();
+    }
+
+    public StringProperty moreInfoTextProperty() {
+        return moreInfoText;
+    }
+
+    public void setMoreInfoText(String moreInfoText) {
+        this.moreInfoText.set(moreInfoText);
     }
 }
