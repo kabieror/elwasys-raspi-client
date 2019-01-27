@@ -128,7 +128,7 @@ public class ElwaManager {
             throws ClassNotFoundException, SQLException, IOException, InterruptedException,
             LocationOccupiedException, FhemException, NoDataFoundException, AlreadyRunningException {
         this.logger.info("Starting up managers");
-        this.singleInstanceManager = new SingleInstanceManager(this.configurationManager.getSingleInstancePort());
+        SingleInstanceManager.instance.start(this.configurationManager.getSingleInstancePort());
         this.dataManager = new DataManager(this.configurationManager);
         this.locationManager = new LocationManager(this.configurationManager);
 

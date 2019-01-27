@@ -16,6 +16,12 @@ import java.util.concurrent.Future;
  */
 public class SingleInstanceManager extends Thread implements ICloseListener {
 
+    /**
+     * Singleton instance
+     */
+    public static SingleInstanceManager instance = new SingleInstanceManager();
+
+
     private Logger logger = LoggerFactory.getLogger(SingleInstanceManager.class);
 
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
@@ -24,7 +30,16 @@ public class SingleInstanceManager extends Thread implements ICloseListener {
     private Future serverFuture;
     private ServerSocket serverSocket;
 
-    public SingleInstanceManager(Integer port) throws AlreadyRunningException {
+    private SingleInstanceManager() {
+
+    }
+
+    public void start(Integer port) throws AlreadyRunningException {
+        if (this.serverSocket != null && this.serverSocket.isBound()) {
+            // Server is running already
+            return;
+        }
+
         this.logger.debug("Starting prevention of concurrent program executions");
         try {
             Socket socket = new Socket("localhost", port);
