@@ -191,7 +191,7 @@ public class WashguardConfiguration extends ConfigurationManager {
      */
     public String getPortalUrl() {
         final String url = this.props.getProperty("portalUrl");
-        if (url.isEmpty()) {
+        if (url == null || url.isEmpty()) {
             this.logger.warn("The configuration value 'portalUrl' is not defined.");
             return "";
         }
